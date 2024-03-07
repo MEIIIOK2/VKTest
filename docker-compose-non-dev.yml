@@ -15,7 +15,6 @@ services:
       retries: 5
     container_name: postgresql
   backend:
-
     command: >
       sh -c "python manage.py collectstatic --noinput &&
              python manage.py migrate &&
@@ -30,7 +29,7 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - static_volume:/vol/web
-      - static_volume:/vol/web
+      - ./backend/media:/backend/media
     expose:
       - 8000
     container_name: django_backend
@@ -51,8 +50,11 @@ services:
       - static_volume:/vol/static
       - frontend_volume:/usr/share/nginx/frontend
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
     ports:
-      - 80:80
+      - 81:80
+      - 444:443
     container_name: nginx
 
   redis:
@@ -73,7 +75,15 @@ services:
       - backend
       - redis
     container_name: celery_worker
-    
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    depends_on:
+      - nginx
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt/
+      - ./certbot/www:/var/www/certbot/
+    command: certonly --webroot -w /var/www/certbot  --email mishasolomin344@gmail.com -d mlgarden.dev --agree-tos
 volumes:
   static_volume:
   frontend_volume:

@@ -28,10 +28,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-3icyhltcjn)f7uw78bf@e3+!im2cj*2lw43fxnrxbmn$d651(v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','*']
-
+ALLOWED_HOSTS = ['mlgarden.dev']
+CSRF_TRUSTED_ORIGINS=['https://mlgarden.dev']
 
 # Application definition
 
@@ -69,6 +69,10 @@ REST_FRAMEWORK = {
      'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
       ],
+      'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    )
+      
 }
 
 SIMPLE_JWT = {
