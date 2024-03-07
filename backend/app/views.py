@@ -48,7 +48,7 @@ def register(request):
         encoded_uid = urlsafe_base64_encode(force_bytes(user.pk))
         encoded_uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = activation_token.make_token(user)
-        url = f'http://127.0.0.1/api/verify/{encoded_uid}/{token}'
+        url = f'https://mlgarden.dev/api/verify/{encoded_uid}/{token}'
         send_activation_email.delay(url,user.email)
         return(Response('Registration sucessfull'))
     return Response(serializer.errors)
@@ -74,24 +74,19 @@ def upload_image(request):
 
     serializer = ImageSerializer(data=request.data)
     if serializer.is_valid():
-        print('valid')
         file = request.FILES.get('file')
         if file.size > 3 * 1024 * 1024: 
-            print('size mismatch') 
             return Response({"error": "File too large. Max size - 3MB"}, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
         try:
             user = CustomUser.objects.get(pk=request.user.id)
-            print('owner found') 
         except:
             return Response({"error": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
         try:
-            print('updating') 
             image = Image.objects.get(owner = user.id)
             image.file = serializer.validated_data.get('file')
             image.save()
             return Response(status.HTTP_200_OK)
         except:
-            print('save as new') 
             serializer.save(owner=user)
             return Response(status.HTTP_200_OK)
     return Response(serializer.errors,status=status.HTTP_401_UNAUTHORIZED )
