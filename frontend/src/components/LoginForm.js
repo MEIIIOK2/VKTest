@@ -24,10 +24,15 @@ function LoginForm({handleAuth}) {
 
     
     const onSubmit = (e) =>{
-        
+
+        const formData = new FormData(e.target),
+            formDataObj = Object.fromEntries(formData.entries())
+        console.log(formDataObj)
+
+        console.log(formdata)
         e.preventDefault()
         if (formdata['loginMode']) {
-            axios.post(process.env.REACT_APP_BACKEND_URL+'api/login/',formdata).then(
+            axios.post(process.env.REACT_APP_BACKEND_URL+'api/login/',formData).then(
                 (res)=>{
                     if(res.status === 200){
                         axios.defaults.headers.post['X-CSRFToken'] = cookie.load('csrftoken');
@@ -73,18 +78,17 @@ function LoginForm({handleAuth}) {
             
         <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Email address</Form.Label>
-            <Form.Control type="email" placeholder="Enter email" onChange={
+            <Form.Control type="email" placeholder="Enter email" name='email' onChange={
                 (e)=>setformData({...formdata,email:e.target.value})
             }/>
-            <Form.Text className="text-muted">
-            </Form.Text>
+            
         </Form.Group>
         
         {
             formdata['loginMode'] ? (
                 <Form.Group className="mb-3" controlId="formBasicPasswordLogin">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" onChange={
+                    <Form.Control type="password" placeholder="Password" autoComplete='false' name='password' onChange={
                         (e)=>setformData({...formdata,password:e.target.value})
                     }/>
                 </Form.Group>
@@ -92,14 +96,14 @@ function LoginForm({handleAuth}) {
                 <div>
                     <Form.Group className="mb-3" controlId="formBasicPasswordRegister">
                         <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" placeholder="Password" autoComplete='false' onChange={
+                        <Form.Control type="password" placeholder="Password" autoComplete='false' name='password' onChange={
                             (e)=>setformData({...formdata,password:e.target.value})
                             } />
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="formBasicPasswordRepeat">
                         <Form.Label>Repeat Password</Form.Label>
-                        <Form.Control type="password" placeholder="Password"onChange={
+                        <Form.Control type="password" placeholder="Password" name='password1' onChange={
                             (e)=>setformData({...formdata,password1:e.target.value})
                             } />
                     </Form.Group>

@@ -4,3 +4,4 @@ node_modules
 .env
 postgres/data/
 certbot
+backend/media/
