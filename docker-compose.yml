@@ -35,19 +35,24 @@ services:
       - ./backend/media:/backend/media
     expose:
       - 8000
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend
+          target : /backend
     container_name: django_backend
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    volumes:
-      - frontend_volume:/frontend/build
     develop:
       watch:
-        - action: rebuild
-          path: ./frontend
-          target : /frontend
+      - action: rebuild
+        path: ./frontend
+        target: /frontend
+    volumes:
+      - frontend_volume:/frontend/build
     container_name: react_frontend
 
   nginx:

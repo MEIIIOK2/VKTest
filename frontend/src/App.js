@@ -7,17 +7,19 @@ import LogoutButton from './components/LogoutButton';
 import { useState } from 'react';
 import axios from 'axios';
 import { useEffect } from 'react';
+import cookie from 'react-cookies';
 
 function App() {
-  const isAuthenticated = useIsAuthenticated();
-  const [authorized, sertAuthorized] = useState(isAuthenticated());
-  const handleAuth = () =>{
-    sertAuthorized(isAuthenticated())
+  const [authorized, setAuthorized] = useState(cookie.load('authorized'));
+  const handleAuth = (value) =>{
+    setAuthorized(value)
+    if (!value) {
+      cookie.remove('authorized')
+    }
   }
   const [image, setImage] = useState()
 
   const getImage =() =>{
-    
       axios.get(process.env.REACT_APP_BACKEND_URL+'api/avatar/').then((res)=>{
         if (res.status==200) {
           setImage(res.data)
@@ -26,11 +28,30 @@ function App() {
   }
 
   useEffect(()=>{
+   
+    
+    
+    const sessionid = cookie.load('sessionid');
+    if (sessionid) {
+      handleAuth(true);
+    }
+
+    const csrftoken = cookie.load('csrftoken');
+    if (! csrftoken) {
+      axios.get(process.env.REACT_APP_BACKEND_URL+'api/csrf/').then((res)=>{
+        if (res.status == 200) {
+          axios.defaults.headers.post['X-CSRFToken'] = cookie.load('csrftoken');
+        }
+      })
+    }
+    else{
+      axios.defaults.headers.post['X-CSRFToken'] = csrftoken;
+    }
     if (authorized) {
-      getImage()
+      getImage(); 
     }
     
-  })
+  },[authorized])
 
 
   if (authorized) {
@@ -46,7 +67,6 @@ function App() {
   }
   return (
     <div className="App">
-      
      <LoginForm handleAuth ={handleAuth}/>
     </div>
   );

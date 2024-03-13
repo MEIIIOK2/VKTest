@@ -3,15 +3,13 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
 import axios from 'axios';
-import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated';
 import Alert from '@mui/material/Alert';
+import cookie from 'react-cookies';
 
-import useSignIn from 'react-auth-kit/hooks/useSignIn';
 
 
 function LoginForm({handleAuth}) {
-    const signIn = useSignIn();
-    let isAuthenticated = useIsAuthenticated();
+    
     const [formdata, setformData] = useState({
         'loginMode':true,
         'email':'',
@@ -23,6 +21,7 @@ function LoginForm({handleAuth}) {
         'enabled':false,
         'severity':'error'
     })
+
     
     const onSubmit = (e) =>{
         
@@ -31,26 +30,16 @@ function LoginForm({handleAuth}) {
             axios.post(process.env.REACT_APP_BACKEND_URL+'api/login/',formdata).then(
                 (res)=>{
                     if(res.status === 200){
-                        if(signIn(
-                            {
-                                auth: {
-                                    token: res.data.token,
-                                    type: 'Bearer'
-                                },
-                            }
-                        )){ 
-                            
-                            handleAuth()
-                           
-                        }
-                        else {
-                            console.log(res.status)
-                        }
+                        axios.defaults.headers.post['X-CSRFToken'] = cookie.load('csrftoken');
+                        const expiry_date = new Date();
+                        expiry_date.setDate(expiry_date.getDate() + 7);
+                        cookie.save('authorized','true',{expires: expiry_date})
+                        handleAuth(true);
                     }
                 }
             ).catch((res)=>{
                 console.log(res.status)
-                setAlert({'enabled':true,'text':'Wrong email or password or account inactive'})
+                setAlert({'enabled':true,'text':'Wrong email or password or account inactive', severity:'error'})
             })
 
         }
@@ -66,7 +55,12 @@ function LoginForm({handleAuth}) {
     }
 
     function switchMode(params) {
-        setformData({...formdata, loginMode : !formdata['loginMode']})
+        setformData({
+        'loginMode':!formdata['loginMode'],
+        'email':'',
+        'password':'',
+        'password1':''
+    })
     }
 
   
